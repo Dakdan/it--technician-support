@@ -5,7 +5,7 @@ const loading = document.getElementById('loadingOverlay');
 
 loginForm.addEventListener('submit', async function(e) {
 
-```
+
 e.preventDefault();
 
 const username =
@@ -58,8 +58,7 @@ try {
         return;
     }
 
-    window.location.href =
-        'main.html';
+    window.location.href = 'main_menu.html';
 
 } catch (err) {
 
@@ -74,26 +73,26 @@ try {
     );
 
 }
-```
+
 
 });
 
 function logout() {
 
-```
+
 localStorage.removeItem('currentUser');
 
 window.location.href = 'index.html';
-```
+
 
 }
 
 function getCurrentUser() {
 
-```
+
 return JSON.parse(
     localStorage.getItem('currentUser')
 );
-```
+
 
 }
