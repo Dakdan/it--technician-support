@@ -58,7 +58,7 @@ try {
         return;
     }
 
-    window.location.href = 'main_menu.html';
+    window.location.href = 'index.html';
 
 } catch (err) {
 
@@ -82,7 +82,7 @@ function logout() {
 
 localStorage.removeItem('currentUser');
 
-window.location.href = 'index.html';
+window.location.href = 'login.html';
 
 
 }
