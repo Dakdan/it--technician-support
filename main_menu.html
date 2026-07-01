@@ -5,33 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Main Menu - IT UDON HOSP</title>
     
-    <!-- ตรวจสอบสิทธิ์ (Auth Check) ทันทีที่โหลด -->
-    <script src="auth-check.js"></script>
-    <script>
-        // 1. สร้างฟังก์ชันก่อน เพื่อให้มั่นใจว่าถูกสร้างแน่นอนแม้เกิด Error การเปลี่ยนหน้า
-        window.getCurrentUser = function() {
-            try {
-                return JSON.parse(localStorage.getItem('currentUser'));
-            } catch(e) {
-                return null;
-            }
-        };
-
-        // 2. ตรวจสอบสิทธิ์และดัก Error ในโหมด Preview
-        const userData = localStorage.getItem('currentUser');
-        if (!userData) {
-            try {
-                window.location.href = "index.html";
-            } catch(e) {
-                console.warn("หยุดการเปลี่ยนหน้าต่างเนื่องจากอยู่ในโหมดพรีวิว");
-            }
-        }
-    </script>
-
-    <!-- Google Fonts & Bootstrap -->
+    <!-- Google Fonts & Bootstrap & FontAwesome CSS -->
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- โหลด Bootstrap JS ไว้ด้านบนเพื่อรองรับการเรียกใช้ Modal -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- ตรวจสอบสิทธิ์ (Auth Check) ทันทีที่โหลด -->
+    <script src="auth-check.js"></script>
     
     <style>
         :root {
@@ -65,10 +48,7 @@
             transform: translate(-50%, -50%) rotate(-30deg);
             font-size: 8vw;
             color: rgba(214, 51, 132, 0.025);
-            font-weight: 800;
-            white-space: nowrap;
-            z-index: -1;
-            pointer-events: none;
+            font-weight: 800; white-space: nowrap; z-index: -1; pointer-events: none;
         }
 
         /* Header */
@@ -77,10 +57,7 @@
             backdrop-filter: blur(10px);
             padding: 12px 20px;
             border-bottom: 1px solid rgba(255, 133, 162, 0.2);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: var(--shadow-sm);
+            position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow-sm);
         }
         .header-logo { width: 45px; height: 45px; object-fit: contain; border-radius: 50%; border: 2px solid var(--pink-primary); padding: 2px; }
         .org-title { color: var(--pink-dark); font-weight: 700; font-size: 1.1rem; line-height: 1.2; }
@@ -89,25 +66,11 @@
 
         /* Cards UI */
         .section-title { font-weight: 600; color: var(--pink-dark); margin-bottom: 15px; border-left: 4px solid var(--pink-primary); padding-left: 10px; }
-        
         .menu-card {
-            background: var(--white);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 133, 162, 0.15);
-            box-shadow: var(--shadow-sm);
-            padding: 20px 10px;
-            text-align: center;
-            height: 100%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            background: var(--white); border-radius: 16px; border: 1px solid rgba(255, 133, 162, 0.15);
+            box-shadow: var(--shadow-sm); padding: 20px 10px; text-align: center; height: 100%; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden;
         }
-        .menu-card:hover, .menu-card:active {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--pink-primary);
-        }
+        .menu-card:hover, .menu-card:active { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--pink-primary); }
         .menu-icon { font-size: 2.2rem; color: var(--pink-primary); margin-bottom: 12px; transition: transform 0.3s; }
         .menu-card:hover .menu-icon { transform: scale(1.1); }
         .menu-title { font-size: 0.9rem; font-weight: 500; color: #444; line-height: 1.3; }
@@ -116,83 +79,31 @@
         /* Alerts */
         .alert-banner {
             background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-            border-radius: 12px;
-            padding: 12px 15px;
-            color: #d63384;
-            font-weight: 500;
-            box-shadow: var(--shadow-sm);
-            border-left: 5px solid #d63384;
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
+            border-radius: 12px; padding: 12px 15px; color: #d63384; font-weight: 500; box-shadow: var(--shadow-sm); border-left: 5px solid #d63384; display: flex; align-items: center; margin-bottom: 10px;
         }
 
         /* Bottom Navigation */
         .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: var(--white);
-            box-shadow: 0 -5px 20px rgba(214, 51, 132, 0.08);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 10px 0 5px;
-            z-index: 1000;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
+            position: fixed; bottom: 0; width: 100%; background: var(--white); box-shadow: 0 -5px 20px rgba(214, 51, 132, 0.08); display: flex; justify-content: space-around; align-items: center; padding: 10px 0 5px; z-index: 1000; border-top-left-radius: 20px; border-top-right-radius: 20px;
         }
-        .nav-item {
-            text-align: center;
-            color: #aaa;
-            font-size: 0.75rem;
-            flex: 1;
-            cursor: pointer;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
+        .nav-item { text-align: center; color: #aaa; font-size: 0.75rem; flex: 1; cursor: pointer; text-decoration: none; transition: color 0.2s; }
         .nav-item.active, .nav-item:hover { color: var(--pink-dark); }
         .nav-item i { font-size: 1.3rem; display: block; margin-bottom: 4px; }
         
         /* Floating QR Code Button */
-        .nav-fab-container {
-            position: relative;
-            flex: 1;
-            display: flex;
-            justify-content: center;
-        }
+        .nav-fab-container { position: relative; flex: 1; display: flex; justify-content: center; }
         .fab-qr {
-            position: absolute;
-            top: -35px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.8rem;
-            box-shadow: 0 8px 15px rgba(214, 51, 132, 0.35);
-            border: 4px solid var(--white);
-            cursor: pointer;
-            transition: transform 0.2s;
+            position: absolute; top: -35px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; box-shadow: 0 8px 15px rgba(214, 51, 132, 0.35); border: 4px solid var(--white); cursor: pointer; transition: transform 0.2s;
         }
         .fab-qr:active { transform: scale(0.95); }
         .fab-text { margin-top: 35px; font-size: 0.75rem; color: var(--pink-dark); font-weight: 500;}
 
         /* Overlay */
         #loadingOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 9999;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
         }
         
-        @media print {
-            .app-header, .bottom-nav, .fab-qr { display: none !important; }
-            body { background: white; padding: 0; }
-        }
+        @media print { .app-header, .bottom-nav, .fab-qr { display: none !important; } body { background: white; padding: 0; } }
     </style>
 </head>
 <body>
@@ -212,113 +123,135 @@
                 <div class="org-subtitle">กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์</div>
             </div>
         </div>
-        <div class="text-end">
-            <div class="user-name" id="displayUserName"><i class="fa-solid fa-circle-user me-1"></i> ผู้ใช้งาน</div>
-            <button onclick="logout()" class="btn btn-sm btn-outline-danger rounded-pill mt-1" style="font-size: 0.7rem;">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> ออกจากระบบ
-            </button>
+        <div class="text-end" id="authZone">
+            <!-- สลับข้อมูลปุ่มเข้าสู่ระบบด้วย JS ด้านล่าง -->
         </div>
     </header>
 
     <!-- MAIN CONTENT -->
     <div class="container mt-4">
-        
-        <!-- ส่วนแสดง Alert -->
         <div id="alertsContainer" class="mb-4"></div>
-
-        <!-- หน้าทางลัด (Shortcuts & Fast Menus) -->
         <div id="shortcutSection" class="mb-4 d-none">
             <h5 class="section-title"><i class="fa-solid fa-bolt text-warning me-2"></i>เมนูทางลัด / งานด่วน</h5>
             <div class="row g-3" id="shortcutGrid"></div>
         </div>
-
-        <!-- แกนหลัก: กลุ่มเมนูต่างๆ -->
         <div id="mainMenuContainer"></div>
-
     </div>
 
     <!-- BOTTOM NAVIGATION BAR -->
     <nav class="bottom-nav">
-        <a href="#" class="nav-item active">
-            <i class="fa-solid fa-house"></i>
-            หน้าแรก
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-clipboard-list"></i>
-            งานของฉัน
-        </a>
-        
-        <!-- Floating QR Button -->
+        <a href="#" class="nav-item active" onclick="handleNavClick(event, 'หน้าแรก')"><i class="fa-solid fa-house"></i>หน้าแรก</a>
+        <a href="#" class="nav-item" onclick="handleNavClick(event, 'งานของฉัน')"><i class="fa-solid fa-clipboard-list"></i>งานของฉัน</a>
         <div class="nav-fab-container">
-            <div class="fab-qr" onclick="openScanner()">
-                <i class="fa-solid fa-qrcode"></i>
-            </div>
+            <div class="fab-qr" onclick="openScanner()"><i class="fa-solid fa-qrcode"></i></div>
             <span class="fab-text">สแกน QR</span>
         </div>
-
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-bell"></i>
-            แจ้งเตือน
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-gear"></i>
-            ตั้งค่า
-        </a>
+        <a href="#" class="nav-item" onclick="handleNavClick(event, 'แจ้งเตือน')"><i class="fa-solid fa-bell"></i>แจ้งเตือน</a>
+        <a href="#" class="nav-item" onclick="handleNavClick(event, 'ตั้งค่า')"><i class="fa-solid fa-gear"></i>ตั้งค่า</a>
     </nav>
 
+    <!-- Modal แจ้งเตือนบังคับล็อกอินโทนชมพู-ขาว -->
+    <div class="modal fade" id="loginRequireModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4" style="border-radius: 20px; border: 1px solid rgba(255, 133, 162, 0.3); box-shadow: 0 10px 30px rgba(214, 51, 132, 0.15);">
+                <div class="modal-body">
+                    <div class="mb-3 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: #fff0f5; border-radius: 50%;">
+                        <i class="fa-solid fa-lock text-danger" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 text-dark">กรุณาเข้าสู่ระบบก่อนใช้งาน</h5>
+                    <p class="text-muted small mb-4">สิทธิ์การเข้าถึงฟังก์ชันนี้ ถูกจำกัดไว้เฉพาะเจ้าหน้าที่กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์ โรงพยาบาลอุดรธานี เท่านั้น</p>
+                    <div class="d-grid gap-2">
+                        <button type="button" onclick="goToLogin()" class="btn btn-danger rounded-pill py-2 fw-bold" style="background: linear-gradient(135deg, #ff85a2, #d63384); border: none;">
+                            <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>เข้าสู่ระบบตอนนี้
+                        </button>
+                        <button type="button" class="btn btn-light rounded-pill py-2 text-muted small" data-bs-dismiss="modal">กลับไปหน้าหลัก</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script ควบคุมระบบ -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // URL API ของคุณ
+        // ⚠️ พี่ช่าง IT ครับ เปลี่ยนตรงนี้ให้เป็น URL จริงของพี่ที่ได้จากการ Deploy ครับ ⚠️
         const API_URL = "https://script.google.com/macros/s/AKfycbwBBEOsw0LV49luy5XBA-D46XldxIj8m91ICNOg2ulwclJUBuUCQw8Qmq9-dKAyF5rA/exec"; 
         
+        let loginModal;
+
         document.addEventListener('DOMContentLoaded', () => {
-            const activeUser = window.getCurrentUser();
-            if(activeUser) {
-                document.getElementById('displayUserName').innerHTML = `<i class="fa-solid fa-circle-user me-1"></i> ${activeUser.UserName} ${activeUser.UserSname}`;
-            }
+            loginModal = new bootstrap.Modal(document.getElementById('loginRequireModal'));
+            renderAuthHeader();
             fetchDashboardData();
         });
 
-        async function fetchDashboardData() {
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'getDashboardData' }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-                
-                if (!response.ok) throw new Error('Network response was not ok');
-                
-                const result = await response.json();
-                document.getElementById('loadingOverlay').style.display = 'none';
-
-                if (result.success) {
-                    renderAlerts(result.data.alerts);
-                    renderMenus(result.data.menus);
-                } else {
-                    alert("API Error: " + result.message);
-                }
-            } catch (err) {
-                document.getElementById('loadingOverlay').style.display = 'none';
-                console.error("Fetch error:", err);
-                alert("เกิดข้อผิดพลาดในการดึงข้อมูลเมนู กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือการตั้งค่า Backend");
+        function renderAuthHeader() {
+            const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
+            const authZone = document.getElementById('authZone');
+            
+            if (activeUser) {
+                authZone.innerHTML = `
+                    <div class="user-name"><i class="fa-solid fa-circle-user me-1"></i> ${getDisplayName()}</div>
+                    <button onclick="logout()" class="btn btn-sm btn-outline-danger rounded-pill mt-1" style="font-size: 0.7rem;">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> ออกจากระบบ
+                    </button>
+                `;
+            } else {
+                authZone.innerHTML = `
+                    <div class="user-name text-muted"><i class="fa-solid fa-circle-user me-1"></i> แขกรับเชิญ</div>
+                    <button onclick="goToLogin()" class="btn btn-sm btn-danger rounded-pill mt-1 px-3" style="font-size: 0.7rem; font-weight:500; background-color: var(--pink-dark); border-color: var(--pink-dark);">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> เข้าสู่ระบบ
+                    </button>
+                `;
             }
         }
 
-        // --- ระบบ Render แจ้งเตือน ---
+        function goToLogin() {
+            try { window.location.href = "index.html"; } catch(e) { window.location.replace("index.html"); }
+        }
+
+        function handleNavClick(event, name) {
+            event.preventDefault();
+            const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
+            if (!activeUser) { loginModal.show(); return; }
+            alert(`กำลังเปิดโมดูล: ${name}`);
+        }
+
+        async function fetchDashboardData() {
+            try {
+                // เรียกดึงข้อมูลผ่านตรรกะ doGet แยก Action แบบเดิมของพี่ร้อยเปอร์เซ็นต์
+                const [menuResponse, alertsResponse] = await Promise.all([
+                    fetch(`${API_URL}?action=getMenu`, { method: 'GET' }),
+                    fetch(`${API_URL}?action=getAlerts`, { method: 'GET' })
+                ]);
+
+                if (!menuResponse.ok || !alertsResponse.ok) throw new Error('Network response was not ok');
+
+                const menusData = await menuResponse.json();
+                const alertsData = await alertsResponse.json();
+
+                document.getElementById('loadingOverlay').style.display = 'none';
+
+                if (Array.isArray(menusData)) renderMenus(menusData);
+                if (Array.isArray(alertsData)) renderAlerts(alertsData);
+
+            } catch (err) {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                console.error("Fetch operations failed:", err);
+            }
+        }
+
         function renderAlerts(alerts) {
             const container = document.getElementById('alertsContainer');
             if (!alerts || alerts.length === 0) return;
 
             let html = '';
-            alerts.forEach(alert => {
+            alerts.forEach(alertItem => {
                 html += `
                     <div class="alert-banner mb-2">
                         <i class="fa-solid fa-circle-exclamation fs-4 me-3"></i>
                         <div>
-                            <div class="fw-bold">${alert.ALERT_TYPE_ID || 'แจ้งเตือนระบบ'}</div>
-                            <div class="small">${alert.ALERT_TEXT || ''}</div>
+                            <div class="fw-bold">${alertItem.type || 'แจ้งเตือนระบบ'}</div>
+                            <div class="small">${alertItem.text || ''}</div>
                         </div>
                     </div>
                 `;
@@ -326,36 +259,29 @@
             container.innerHTML = html;
         }
 
-        // --- ระบบ Render เมนูแบบจัดกลุ่ม ---
         function renderMenus(menus) {
             const shortcutGrid = document.getElementById('shortcutGrid');
             const mainContainer = document.getElementById('mainMenuContainer');
-            
             if (!menus || menus.length === 0) return;
 
             const groupedMenus = {};
             const shortcuts = [];
 
-            // จัดหมวดหมู่เมนู
             menus.forEach(m => {
-                if(m.MENU_TYPE === 'fast-menu' || m.MENU_TYPE === 'alert-menu') {
+                if (m.menu_type === 'fast-menu' || m.menu_type === 'alert-menu') {
                     shortcuts.push(m);
                 } else {
-                    const groupName = m.MAIN_MENU || 'เมนูหลักอื่นๆ';
-                    if (!groupedMenus[groupName]) {
-                        groupedMenus[groupName] = [];
-                    }
+                    const groupName = m.main_menu || 'เมนูหลักอื่นๆ';
+                    if (!groupedMenus[groupName]) groupedMenus[groupName] = [];
                     groupedMenus[groupName].push(m);
                 }
             });
 
-            // 1. วาดทางลัด (Shortcuts)
             if (shortcuts.length > 0) {
                 document.getElementById('shortcutSection').classList.remove('d-none');
                 shortcutGrid.innerHTML = shortcuts.map(m => createCardHTML(m)).join('');
             }
 
-            // 2. วาดกลุ่มเมนูหลัก (Sub-menu)
             let mainHtml = '';
             for (const [groupName, items] of Object.entries(groupedMenus)) {
                 mainHtml += `
@@ -370,51 +296,45 @@
             mainContainer.innerHTML = mainHtml;
         }
 
-        // สร้าง HTML สำหรับการ์ดเมนู
         function createCardHTML(menu) {
-            const icon = menu.ICON || 'fa-solid fa-layer-group'; // ไอคอนเริ่มต้น
-            const link = menu.LINK_URL || '#';
+            let iconClass = menu.icon || 'fa-solid fa-layer-group';
+            if (!iconClass.startsWith('fa-')) iconClass = 'fa-solid fa-' + iconClass;
+            const link = menu.url || '#';
             
             return `
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="menu-card" onclick="openMenu('${link}')">
-                        <i class="${icon} menu-icon"></i>
-                        <div class="menu-title">${menu.MENU_NAME}</div>
-                        ${menu.DESC ? `<div class="menu-desc">${menu.DESC}</div>` : ''}
+                        <i class="${iconClass} menu-icon"></i>
+                        <div class="menu-title">${menu.menu_name}</div>
+                        ${menu.desc ? `<div class="menu-desc">${menu.desc}</div>` : ''}
                     </div>
                 </div>
             `;
         }
 
-        // ฟังก์ชันเปิดเมนู
         function openMenu(url) {
+            const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
+            if (!activeUser) { loginModal.show(); return; }
+
             if(url !== '#' && url.trim() !== '') {
                 document.getElementById('loadingOverlay').style.display = 'flex';
-                document.querySelector('#loadingOverlay .text-pink-dark').innerText = "กำลังเข้าสู่ระบบ...";
+                document.querySelector('#loadingOverlay .text-pink-dark').innerText = "กำลังเข้าสู่ระบบโมดูล...";
                 window.location.href = url;
             } else {
                 alert('อยู่ระหว่างการพัฒนาระบบส่วนนี้ครับ');
             }
         }
 
-        // ฟังก์ชันเปิด Scanner
         function openScanner() {
+            const activeUser = window.getCurrentUser ? window.getCurrentUser() : null;
+            if (!activeUser) { loginModal.show(); return; }
+
             document.getElementById('loadingOverlay').style.display = 'flex';
             document.querySelector('#loadingOverlay .text-pink-dark').innerText = "กำลังเปิดกล้องสแกน QR...";
             setTimeout(() => {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 alert('เปิดโมดูล Scanner สำหรับการอ่าน QR Code (ระบบอยู่ระหว่างพัฒนา)');
             }, 800);
-        }
-
-        function logout() {
-            localStorage.removeItem('currentUser');
-            try {
-                window.location.href = "index.html";
-            } catch(e) {
-                console.warn("หยุดการเปลี่ยนหน้าต่างเนื่องจากอยู่ในโหมดพรีวิว");
-                alert("ออกจากระบบเรียบร้อย (จำลองการทำงานในโหมดพรีวิว)");
-            }
         }
     </script>
 </body>
