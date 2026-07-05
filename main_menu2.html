@@ -770,48 +770,28 @@
                 document.getElementById('loadingOverlay').style.display = 'none';
 
                 if (result.success) {
-                    let myAlertCount = 0;
-                    let filteredAlerts = [];
                     const activeUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+                    let filteredAlerts = [];
 
                     if (result.alerts) {
-                        // กรองข้อมูลแจ้งเตือน ให้แสดงเฉพาะกรณีที่เป็น Global หรือ USER_ID ตรงกับที่ล็อกอิน
+                        // กรองข้อมูลโดยใช้ USERID
                         filteredAlerts = result.alerts.filter(alertItem => {
-                            const targetUserId = alertItem.USER_ID || alertItem.TARGET_USER_ID;
-                            // ถ้า API ไม่ได้ส่ง USER_ID มา ถือว่าเป็นแจ้งเตือนสาธารณะ หรือถ้าส่งมาต้องตรงกับ UserPN
-                            return !targetUserId || (activeUser && String(targetUserId) === String(activeUser.UserPN));
+                            const targetUid = String(alertItem.USER_ID || '').trim();
+                            const myUid = String(activeUser ? activeUser.USERID : '').trim();
+                            
+                            // เงื่อนไข: ถ้าว่างคือสาธารณะ หรือถ้าตรงกับ USERID คือของตัวเอง
+                            return targetUid === "" || (myUid !== "" && targetUid === myUid);
                         });
-                        
-                        myAlertCount = filteredAlerts.length;
                     }
-                    // ย้ายฟังก์ชันอัปเดตวาดแจ้งเตือนออกมาด้านนอก เพื่อให้สามารถเคลียร์ข้อมูลเก่าทิ้งได้แม้ Array จะส่งมาว่างเปล่า
+                    
                     renderAlerts(filteredAlerts);
-
-                    // อัปเดตตัวเลขแจ้งเตือนที่ Bottom Nav
-                    const navBadge = document.getElementById('bottomNavAlertBadge');
-                    if (navBadge) {
-                        if (myAlertCount > 0) {
-                            navBadge.innerText = myAlertCount > 99 ? '99+' : myAlertCount;
-                            navBadge.classList.remove('d-none');
-                        } else {
-                            navBadge.classList.add('d-none');
-                        }
-                    }
-
-                    if (result.menus) renderMenus(result.menus, myAlertCount); // ส่งตัวเลขเข้าไปวาดในการ์ดเมนูด้วย
-                } else {
-                    // +++ ส่วนที่เพิ่มเข้ามาใหม่: ดักจับ Error จากฝั่ง Apps Script (เช่น ไอดี Sheet ผิด) +++
-                    console.error("Backend API Error:", result.error);
-                    showSystemModal('เกิดข้อผิดพลาดจากฐานข้อมูล', 'ระบบหลังบ้านไม่สามารถดึงข้อมูลได้: ' + result.error, 'fa-solid fa-database text-danger');
+                    if (result.menus) renderMenus(result.menus, filteredAlerts.length);
                 }
             } catch (err) {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 console.error("Fetch error:", err);
-                // ดักจับ Error กรณีที่ URL ของ Web App ผิด หรืออินเทอร์เน็ตหลุด
-                // showSystemModal('เครือข่ายผิดพลาด', 'เกิดข้อผิดพลาดในการดึงข้อมูลเมนู กรุณาตรวจสอบสิทธิ์และการ Deploy เว็บแอป', 'fa-solid fa-wifi');
             }
         }
-
        // วาดส่วนแจ้งเตือน และยิง Notification บนจอมือถืออัตโนมัติหากมีข้อความเข้ามาใหม่
         function renderAlerts(alerts) {
             const container = document.getElementById('alertsContainer');
