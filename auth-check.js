@@ -64,13 +64,13 @@ function getCurrentUser() {
     return window.user || null;
 }
 
-/*
- * 🛠️ ฟังก์ชัน: hasRole(role)
- * หน้าที่: ตรวจสอบระดับสิทธิ์ (UserTypeID) ของผู้ใช้งาน
- * การนำไปใช้: ใช้ซ่อน/แสดง เมนู หรือปุ่มที่ต้องการสิทธิ์เฉพาะเจาะจง
-* @param {string} role - ชื่อสิทธิ์ที่ต้องการตรวจสอบ (ตัวพิมพ์เล็ก-ใหญ่ไม่มีผล)
- * Return: (boolean) true ถ้าสิทธิ์ตรงกัน, false ถ้าไม่ตรงหรือไม่ได้ล็อกอิน
- */
+
+// * 🛠️ ฟังก์ชัน: hasRole(role)
+// * หน้าที่: ตรวจสอบระดับสิทธิ์ (UserTypeID) ของผู้ใช้งาน
+// * การนำไปใช้: ใช้ซ่อน/แสดง เมนู หรือปุ่มที่ต้องการสิทธิ์เฉพาะเจาะจง
+//* @param {string} role - ชื่อสิทธิ์ที่ต้องการตรวจสอบ (ตัวพิมพ์เล็ก-ใหญ่ไม่มีผล)
+// * Return: (boolean) true ถ้าสิทธิ์ตรงกัน, false ถ้าไม่ตรงหรือไม่ได้ล็อกอิน
+// */
 function hasRole(role) {
     if (!window.user) return false;
     return String(window.user.UserTypeID).toUpperCase() === String(role).toUpperCase();
