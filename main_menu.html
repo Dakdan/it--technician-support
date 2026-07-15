@@ -49,16 +49,30 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-       /* ลายน้ำแบบนูน (Embossed Watermark) */
+       /* ลายน้ำแบบนูน (Embossed Watermark) - แสดงหลายบรรทัดเต็มหน้าจอ */
         body::before {
-            content: "IT TECHNICIAN UDON HOSP     IT TECHNICIAN UDON HOSP      IT TECHNICIAN UDON HOSP";
+            /* ใช้ทริคสร้างข้อความยาว ๆ ซ้ำกันยาว ๆ หรือใช้ช่องว่างช่วย */
+            content: "IT TECHNICIAN UDON HOSP     IT TECHNICIAN UDON HOSP     IT TECHNICIAN UDON HOSP     IT TECHNICIAN UDON HOSP     IT TECHNICIAN UDON HOSP     IT TECHNICIAN UDON HOSP     IT TECHNICIAN UDON HOSP     IT TECHNICIAN UDON HOSP     IT TECHNICIAN UDON HOSP     IT TECHNICIAN UDON HOSP     IT TECHNICIAN UDON HOSP  IT TECHNICIAN UDON HOSP";
+            
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 3vw; /* ปรับขนาดเล็กลงเล็กน้อยเพื่อให้ไม่หลุดขอบจอ */
+            top: -50%;  /* ขยายขอบเขตให้เกินหน้าจอเผื่อตอนหมุน */
+            left: -50%;
+            width: 200vw;
+            height: 200vh;
+            
+            /* หมุนเอียงลายน้ำ */
+            transform: rotate(-30deg);
+            
+            /* สั่งให้จัดตัวอักษรขึ้นบรรทัดใหม่ซ้ำ ๆ และกระจายตัว */
+            display: flex;
+            flex-wrap: wrap;
+            align-content: space-around;
+            justify-content: space-around;
+            word-break: break-all;
+            
+            font-size: 4vw; /* ปรับขนาดเล็กลงเพื่อให้เรียงกันสวยงามเต็มหน้า */
             font-weight: 900;
-            white-space: nowrap;
+            line-height: 2.5; /* ระยะห่างระหว่างบรรทัด */
             z-index: -1;
             pointer-events: none;
             
