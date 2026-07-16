@@ -213,10 +213,10 @@
         .badge-age { background-color: #fef08a; color: #854d0e; border: 1px solid #fde047; font-weight: 500;}
         .badge-source { background-color: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; font-weight: 500;}
 
-        /* Highlight Search Text */
+        /* Highlight Search Text - เปลี่ยนเป็นสีเขียว */
         .highlight {
-            background-color: #bbf7d0; /* เปลี่ยนพื้นหลังเป็นสีเขียวอ่อน */
-            color: #15803d; /* เปลี่ยนตัวหนังสือเป็นสีเขียวเข้ม */
+            background-color: #bbf7d0; 
+            color: #15803d; 
             font-weight: bold;
             padding: 0 2px;
             border-radius: 3px;
@@ -269,7 +269,7 @@
             padding: 50px 20px;
         }
 
-        /* จัดการ Layout สำหรับ PC ให้กึ่งกลาง และคล้าย App มือถือ */
+        /* จัดการ Layout สำหรับ PC ให้กึ่งกลาง */
         .app-layout-wrapper {
             max-width: 768px;
             margin: 0 auto;
@@ -296,12 +296,9 @@
     <!-- HEADER -->
     <header class="app-header" style="display: block; padding: 0;">
         <div class="app-layout-wrapper" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px;">
-            <!-- แก้ไขปุ่มกลับให้ใช้งานได้จริง -->
             <a href="main_menu.html" class="btn-back" title="กลับหน้าหลัก">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
-            
-            <!-- นำโลโก้กลับมาแสดงผลให้เหมือนหน้าหลัก -->
             <img src="logo02.png" alt="Logo" style="width: 42px; height: 42px; object-fit: contain; border-radius: 50%; border: 2px solid var(--white); padding: 2px; background-color: var(--white);" onerror="this.src='https://placehold.co/42?text=IT'">
             
             <div class="header-title-box">
@@ -389,7 +386,7 @@
     <script>
         // URL ปลายทางเมื่อเลือกรายการหรือสแกนสำเร็จ
         const TARGET_URL_BASE = "https://dakdan.github.io/it-technician-support/asset_detail.html?Asset_ID=";
-        // API ปลายทางที่ทำงานร่วมกับ code.gs (อัปเดตตามที่ระบุ)
+        // API ปลายทางที่ทำงานร่วมกับ code.gs
         const API_URL = "https://script.google.com/macros/s/AKfycbxLCgrDKBHjBp24Cfv4zk7aEWLnv-CCXoROVHRqyfeaULZ6gat4WQHcfH9_xBsUFgpVGQ/exec";
 
         let html5QrcodeScanner = null;
@@ -423,7 +420,7 @@
                 
                 if (keyword.length > 0) {
                     clearBtn.style.display = 'block';
-                    executeLocalSearch(keyword); // ค้นหาฝั่ง Client ทันทีแบบไม่ต้องหน่วงเวลา (Debounce)
+                    executeLocalSearch(keyword); // ค้นหาฝั่ง Client ทันที
                 } else {
                     clearBtn.style.display = 'none';
                     resultsContainer.innerHTML = '';
@@ -491,7 +488,7 @@
                 
                 if (similarity > 0) {
                     results.push({
-                        ...item, // ก๊อปปี้ object เดิมมา (ซึ่งมี Asset_Detail อยู่แล้ว)
+                        ...item, 
                         score: similarity
                     });
                 }
@@ -514,24 +511,24 @@
             }
         }
 
-        // ฟังก์ชันคำนวณคะแนน โดยให้ AssetID อยู่บน และตามด้วย Serial (เรียงลำดับความแม่นยำ)
+        // ฟังก์ชันคำนวณคะแนน (เน้นจากขวาไปซ้ายตามที่ต้องการ)
         function getSimilarityScoreLocal(assetID, serial, query) {
             const aID = String(assetID || "").toLowerCase();
             const ser = String(serial || "").toLowerCase();
             
-            // กลุ่มที่ 1: ค้นเจอใน AssetID (ให้คะแนนสูง 500 - 800)
+            // กลุ่มที่ 1: ค้นเจอใน AssetID (ให้คะแนนสูงกว่า Serial เสมอ)
             let assetScore = 0;
             if (aID === query) assetScore = 800; // AssetID ตรงเป๊ะ 100%
-            else if (aID.startsWith(query)) assetScore = 700; // AssetID ตรงจากซ้ายไปขวา
-            else if (aID.endsWith(query)) assetScore = 600; // AssetID ตรงจากขวาไปซ้าย
-            else if (aID.includes(query)) assetScore = 500; // AssetID มีคำนี้แทรกอยู่
+            else if (aID.endsWith(query)) assetScore = 700; // ตรงจาก ขวาไปซ้าย (สำคัญสุด)
+            else if (aID.startsWith(query)) assetScore = 600; // ตรงจาก ซ้ายไปขวา
+            else if (aID.includes(query)) assetScore = 500; // แค่มีคำนี้แทรกอยู่
             
-            // กลุ่มที่ 2: ค้นเจอใน Serial Number (ให้คะแนนรองลงมา 100 - 400 เพื่อให้ต่อท้าย AssetID)
+            // กลุ่มที่ 2: ค้นเจอใน Serial Number (ให้คะแนนรองลงมา)
             let serialScore = 0;
-            if (ser === query) serialScore = 400; // SN ตรงเป๊ะ 100%
-            else if (ser.startsWith(query)) serialScore = 300; // SN ตรงจากซ้ายไปขวา
-            else if (ser.endsWith(query)) serialScore = 200; // SN ตรงจากขวาไปซ้าย
-            else if (ser.includes(query)) serialScore = 100; // SN มีคำนี้แทรกอยู่
+            if (ser === query) serialScore = 400; 
+            else if (ser.endsWith(query)) serialScore = 300; 
+            else if (ser.startsWith(query)) serialScore = 200; 
+            else if (ser.includes(query)) serialScore = 100; 
 
             // คืนค่าคะแนนสูงสุด หากเจอทั้ง AssetID และ Serial ค่าของ AssetID จะชนะเสมอ
             return Math.max(assetScore, serialScore);
@@ -566,7 +563,7 @@
                 const age = detail["อายุ"] || detail["Age"] || "ไม่ระบุอายุ";
                 const sourceDb = item.Source || detail.Source || "ไม่ระบุคลัง";
                 
-                // ถอด Link รูปภาพตัวแรก หากได้ ID จาก Logs
+                // ถอด Link รูปภาพตัวแรก
                 let imgUrl = "https://placehold.co/100x100/e2e8f0/475569?text=No+Img";
                 if (detail.Images && detail.Images.length > 0) {
                     const firstImgId = String(detail.Images[0]).trim();
@@ -579,11 +576,9 @@
                 card.className = 'asset-card';
                 card.onclick = () => goToDetail(assetId);
 
-                // ทำ Highlight คำที่ค้นหา
+                // ทำ Highlight คำที่ค้นหา (เน้นไฮไลท์จากด้านหลังสุดที่เจอ)
                 const displayId = highlightText(assetId, keyword);
                 const displaySerial = highlightText(serial, keyword);
-                const displayGroup = highlightText(group, keyword);
-                const displayAge = highlightText(age, keyword);
 
                 card.innerHTML = `
                     <img src="${imgUrl}" alt="${assetId}" class="asset-img" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e2e8f0/475569?text=IT'">
@@ -591,8 +586,8 @@
                         <div class="asset-id">${displayId}</div>
                         <div class="asset-serial"><i class="fa-solid fa-barcode me-1 text-secondary"></i> SN: ${displaySerial}</div>
                         <div class="asset-badges mt-1">
-                            <span class="badge badge-group rounded-pill"><i class="fa-solid fa-tags me-1"></i>${displayGroup}</span>
-                            <span class="badge badge-age rounded-pill"><i class="fa-regular fa-clock me-1"></i>อายุ ${displayAge}</span>
+                            <span class="badge badge-group rounded-pill"><i class="fa-solid fa-tags me-1"></i>${group}</span>
+                            <span class="badge badge-age rounded-pill"><i class="fa-regular fa-clock me-1"></i>อายุ ${age}</span>
                             <span class="badge badge-source rounded-pill"><i class="fa-solid fa-database me-1"></i>${sourceDb}</span>
                         </div>
                     </div>
@@ -601,12 +596,29 @@
             });
         }
 
-        // ฟังก์ชันทำ Highlight ตัวหนังสือกรณีเจอคำตรง
+        // ฟังก์ชันทำ Highlight ให้สอดคล้องกับตรรกะค้นหา (ขวาไปซ้าย)
         function highlightText(text, keyword) {
-            if (!keyword) return text;
-            const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`(${escapedKeyword})`, 'gi');
-            return text.replace(regex, '<span class="highlight">$1</span>');
+            if (!keyword || !text) return text;
+            const textLower = String(text).toLowerCase();
+            const keywordLower = String(keyword).toLowerCase();
+            const keywordLen = keyword.length;
+            
+            if (textLower === keywordLower) {
+                // ตรง 100% ไฮไลท์ทั้งหมด
+                return `<span class="highlight">${text}</span>`;
+            } else if (textLower.endsWith(keywordLower)) {
+                // ตรงจาก ขวาไปซ้าย -> ไฮไลท์เฉพาะส่วนท้ายสุด
+                const startIndex = text.length - keywordLen;
+                return text.substring(0, startIndex) + `<span class="highlight">${text.substring(startIndex)}</span>`;
+            } else if (textLower.startsWith(keywordLower)) {
+                // ตรงจาก ซ้ายไปขวา -> ไฮไลท์เฉพาะส่วนหน้าสุด
+                return `<span class="highlight">${text.substring(0, keywordLen)}</span>` + text.substring(keywordLen);
+            } else if (textLower.includes(keywordLower)) {
+                // ถ้ามีแทรกอยู่ตรงกลาง -> หาตัวที่อยู่ "ขวาสุด" (ท้ายสุดที่เจอ) มาไฮไลท์
+                const lastIndex = textLower.lastIndexOf(keywordLower);
+                return text.substring(0, lastIndex) + `<span class="highlight">${text.substring(lastIndex, lastIndex + keywordLen)}</span>` + text.substring(lastIndex + keywordLen);
+            }
+            return text; // ไม่เจอให้คืนค่าเดิม
         }
 
         // นำทางไปยังระบบปลายทาง
@@ -624,7 +636,7 @@
         }
 
         // ==============================
-        // ส่วนควบคุมระบบกล้องสแกน QR Code / Barcode (ยิง API ไปตัด String หลังบ้าน)
+        // ส่วนควบคุมระบบกล้องสแกน QR Code / Barcode (ยิง API ไปประมวลผลที่ Apps Script)
         // ==============================
         function openScannerModal() {
             scannerModalInstance.show();
@@ -650,18 +662,15 @@
         }
 
         async function onScanSuccess(decodedText) {
-            // สั่นตอบสนองเบาๆ บนมือถือหากรองรับ
             if ("vibrate" in navigator) navigator.vibrate(200);
-            
             closeScannerModal();
             
-            // แสดงสถานะระหว่างส่งสแกน
             showLoading(true);
-            resultsContainer.innerHTML = ''; // เคลียร์ผลการค้นหาเดิม
+            resultsContainer.innerHTML = ''; 
             resultCountLabel.innerText = "กำลังสืบค้นจากข้อมูลกล้อง...";
 
             try {
-                // ให้ระบบส่งไปประมวลผลการตัด URL ด้วย code.gs เหมือนเดิม (mode: scan)
+                // ส่งไปให้ระบบหลังบ้าน (Apps Script) ทำการตัดคำ URL ให้
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify({
@@ -690,7 +699,7 @@
         }
 
         function onScanFailure(error) {
-            // ปล่อยให้ระบบวนลูปจับภาพต่อไปจนกว่าจะเจอสัญลักษณ์ที่ตรงเงื่อนไข
+            // ปล่อยให้ระบบวนลูปจับภาพต่อไป
         }
     </script>
 </body>
