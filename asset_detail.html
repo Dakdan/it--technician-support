@@ -470,56 +470,38 @@
     <!-- JavaScript System Engine (Keep functionality exact same as original) -->
     <script>
         // URL สำหรับเชื่อมต่อฐานข้อมูล Google Apps Script
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz_mX0O7D3PAl4uitg3V5apUECjXUZZPB4sM_B_3Ca7HnBdgJl9jPRiWgWKePrGRNdAFA/exec";
+            const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz_mX0O7D3PAl4uitg3V5apUECjXUZZPB4sM_B_3Ca7HnBdgJl9jPRiWgWKePrGRNdAFA/exec";
 
-        document.addEventListener('DOMContentLoaded', () => {
-            startClock();
-
-            // 1. รับค่าพารามิเตอร์ ID จากตัวแปรที่ Google Apps Script (code.gs) ส่งมาให้โดยตรง
-            let assetId = "<?= typeof urlId !== 'undefined' ? urlId : '' ?>";
-            
-            // กรณีรันบนโหมด Local หรือ Preview (แท็กยังไม่ถูกแปลผล) ให้ดึงจาก URL ปกติ
-            if (assetId.includes("?=") || !assetId) {
+            document.addEventListener('DOMContentLoaded', () => {
+                // 1. รับ ID จาก URL
                 const urlParams = new URLSearchParams(window.location.search);
-                assetId = urlParams.get('AssetID') || urlParams.get('id') || urlParams.get('assetid');
-            }
+                const assetId = urlParams.get('Asset_ID') || urlParams.get('assetid') || urlParams.get('id');
 
-            // ค่าเริ่มต้นเมื่อไม่มี Parameter ใดๆ ส่งมาเลย
-            
-
-            // 2. ตรวจสอบการโหลดข้อมูลภายนอก / หรือรันใน Apps Script Environment
-            if (typeof google !== 'undefined' && google.script) {
-                google.script.run
-                    .withSuccessHandler(renderDashboard)
-                    .withFailureHandler((err) => showError("เกิดข้อผิดพลาดในการดึงข้อมูลสดจากระบบ API: " + err))
-                    .getAssetDetailMaster(assetId); 
-            } else {
+                if (assetId) {
                 fetchDataFromGAS(assetId);
-            }
-        });
-
-        // ฟังก์ชันดึงข้อมูลจาก Apps Script Web App
-        async function fetchDataFromGAS(assetId) {
-            try {
-                const targetUrl = `${GAS_WEB_APP_URL}?action=getAsset&assetId=${encodeURIComponent(assetId)}`;
-                const response = await fetch(targetUrl);
-                
-                if (!response.ok) {
-                    throw new Error("HTTP Status: " + response.status);
+                } else {
+                if (typeof showError === 'function') showError("ไม่พบ Asset_ID ใน URL");
                 }
+            });
+
+            // 2. ใช้ fetch แทน google.script.run เพื่อเลี่ยง Error 'google is not defined'
+            async function fetchDataFromGAS(assetId) {
+                try {
+                const url = `${GAS_WEB_APP_URL}?action=getAsset&Asset_ID=${encodeURIComponent(assetId)}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Network error");
                 
                 const result = await response.json();
-                renderDashboard(result);
-            } catch (err) {
-                console.warn("Live API fetch failed. Loading simulated mock data for development/preview environment...", err.message);
-                // ดึงข้อมูลพรีเมียมตัวอย่างมาใช้ เพื่ออำนวยความสะดวกในการกดดู Preview
-                loadPremiumMockupData(assetId);
+                
+                // เรียกฟังก์ชันแสดงผลหลัก
+                if (typeof renderDashboard === 'function') {
+                    renderDashboard(result);
+                }
+                } catch (err) {
+                console.error("Fetch Error:", err);
+                if (typeof showError === 'function') showError("ดึงข้อมูลไม่สำเร็จ: " + err.message);
+                }
             }
-        }
-
-        // ระบบจำลองข้อมูลระดับพรีเมียมกรณี API ยังเข้าถึงไม่ได้ในหน้าพรีวิว เพื่อให้หน้าดีไซน์สวยงามครบถ้วน
-        
-
         // 3. นำข้อมูลสดมาแสดงผลบน Dashboard (Strictly Real Data)
         function renderDashboard(response) {
             if (!response || response.status === 'error' || !response.data) {
