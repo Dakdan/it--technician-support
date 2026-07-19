@@ -485,9 +485,7 @@
             }
 
             // ค่าเริ่มต้นเมื่อไม่มี Parameter ใดๆ ส่งมาเลย
-            if (!assetId) {
-                assetId = "2-08-003-005-67-211"; 
-            }
+            
 
             // 2. ตรวจสอบการโหลดข้อมูลภายนอก / หรือรันใน Apps Script Environment
             if (typeof google !== 'undefined' && google.script) {
@@ -520,72 +518,7 @@
         }
 
         // ระบบจำลองข้อมูลระดับพรีเมียมกรณี API ยังเข้าถึงไม่ได้ในหน้าพรีวิว เพื่อให้หน้าดีไซน์สวยงามครบถ้วน
-        function loadPremiumMockupData(assetId) {
-            const mockResponse = {
-                status: "success",
-                data: {
-                    info: {
-                        "AssetID": assetId || "IT-2026-9912",
-                        "ชื่อรายการครุภัณฑ์": "เครื่องคอมพิวเตอร์ประมวลผลประสิทธิภาพสูง All-in-One (เครื่องตัวอย่างในหน้า Preview)",
-                        "รหัสครุภัณฑ์": "2-08-003-005-67-212",
-                        "Searail": "S/N: UDH-994827104-X",
-                        "MaStatus": "Active (ใช้งานปกติ)",
-                        "CoStatus": "ในความครอบครอง",
-                        "Ass_Img": "https://images.unsplash.com/photo-1588508065123-287b28e013da?auto=format&fit=crop&q=80&w=600",
-                        "หมวดครุภัณฑ์": "ครุภัณฑ์คอมพิวเตอร์และเครือข่าย",
-                        "Asset_Type_ID": "AIO-PC",
-                        "Asset_Item_Type_ID": "Core-i7-Gen13",
-                        "รายละเอียด สเปค ยี่ห้อ ขนาด รูปลักษณ์": "HP ProOne 240 G9 All-in-One PC, 23.8\" FHD, Intel Core i7-1355U, RAM 16GB, SSD 512GB, Windows 11 Pro",
-                        "รหัสครุภัณฑ์เดิม": "UDH-IT-66-0428",
-                        "หน่วยงานที่รับผิดชอบ/สถานที่อยู่ ปัจจุบัน": "กลุ่มงานเทคโนโลยีสารสนเทศทางการแพทย์ (ตึกนอกผู้ป่วยนอก ชั้น 3)",
-                        "หน่วยงานที่รับผิดชอบ/สถานที่ติดตั้ง": "หอผู้ป่วยวิกฤตหัวใจและหลอดเลือด (CCU)",
-                        "NOUPID": "UD-NOUPID-2026",
-                        "NOID_2": "UD-NOID2-9982",
-                        "วันที่รับเข้า": "2024-10-12",
-                        "ปีที่รับเข้า": "2567",
-                        "แหล่งเงินที่ใช้จัดซื้อ": "เงินบำรุงโรงพยาบาลอุดรธานี",
-                        "ราคา": "34500",
-                        "Varanty": "3 ปี On-Site Service (หมดประกัน 12 ต.ค. 2570)",
-                        "IPAddress": "10.120.48.15",
-                        "MACAddress": "D8:BB:C1:99:A2:F4",
-                        "OS": "Windows 11 Professional 64-bit",
-                        "CPU_RAM_Specs": "Intel Core i7-1355U (up to 5.0 GHz) / RAM 16GB DDR4 / SSD NVMe 512GB",
-                        "อายุ": "2",
-                        "ต่ำกว่าเกณฑ์": "ผ่านเกณฑ์มาตรฐานกระทรวงสาธารณสุข",
-                        "Note2": "17.420842, 102.784151",
-                        "Note3": "สำรองข้อมูลระบบผ่านระบบคลาวด์ศูนย์ข้อมูลกลางไอทีเป็นประจำทุกสัปดาห์"
-                    },
-                    calculations: {
-                        healthScore: 94,
-                        riskScore: 10,
-                        riskLevel: "Low",
-                        totalMoves: 2,
-                        totalPM: 1,
-                        totalMA: 2
-                    },
-                    logs: {
-                        move: [
-                            { date: "2025-05-18", fromLocation: "คลังสารสนเทศกลาง", toLocation: "หอผู้ป่วยวิกฤต (CCU)", operator: "นายสิริชัย มโนดี", note: "ย้ายตามใบคำขอสิทธิ์ทดแทนตัวเก่า" },
-                            { date: "2024-10-15", fromLocation: "กลุ่มงานเทคโนโลยีสารสนเทศ", toLocation: "คลังสารสนเทศกลาง", operator: "น.ส.ดวงพร อรุณศรี", note: "นำส่งจากผู้จัดจำหน่ายเข้าระบบทะเบียนพัสดุ" }
-                        ],
-                        ma: [
-                            { date: "2025-11-04", details: "อัปเกรดความเร็วระบบ LAN และทำความสะอาดฝุ่นภายในเครื่องประจำปี", technician: "นายสมชาย ช่างไอทีดีเยี่ยม", cost: "500" },
-                            { date: "2025-02-10", details: "แก้ไขอาการระบบปฏิบัติการไม่บูตเนื่องจากไฟล์วินโดวส์ระบบสารสนเทศส่วนกลางเสียหาย", technician: "นายประสิทธิ์ ช่างซ่อมด่วน", cost: "0" }
-                        ],
-                        pm: [
-                            { date: "2026-04-12", details: "Preventive Maintenance: ตรวจเช็คสถานะการทำงาน CPU, RAM และทดสอบแบตเตอรี่สำรองไฟ UPS", technician: "น.ส.วิภาวรรณ นันทา", cost: "150" }
-                        ],
-                        images: [
-                            { IMAGE_URL: "https://images.unsplash.com/photo-1588508065123-287b28e013da?auto=format&fit=crop&q=80&w=400" },
-                            { IMAGE_URL: "https://images.unsplash.com/photo-1547082299-de196ea013d6?auto=format&fit=crop&q=80&w=400" }
-                        ]
-                    }
-                }
-            };
-            
-            showToast("⚠️ ระบบพรีวิว: โหลดระบบข้อมูลภาพรวมจำลอง (Modern Blue Theme) แล้ว");
-            renderDashboard(mockResponse);
-        }
+        
 
         // 3. นำข้อมูลสดมาแสดงผลบน Dashboard (Strictly Real Data)
         function renderDashboard(response) {
