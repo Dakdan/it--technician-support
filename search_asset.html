@@ -661,41 +661,31 @@
             scannerModalInstance.hide();
         }
 
-        async function onScanSuccess(decodedText) {
+        function onScanSuccess(decodedText) {
             if ("vibrate" in navigator) navigator.vibrate(200);
             closeScannerModal();
             
-            showLoading(true);
-            resultsContainer.innerHTML = ''; 
-            resultCountLabel.innerText = "กำลังสืบค้นจากข้อมูลกล้อง...";
-
-            try {
-                // ส่งไปให้ระบบหลังบ้าน (Apps Script) ทำการตัดคำ URL ให้
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        mode: 'scan',
-                        query: decodedText
-                    }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-
-                if (!response.ok) throw new Error("Scanning Fetch Failed");
-                const result = await response.json();
-                showLoading(false);
-
-                if (result.status === "success" && result.data && result.data.AssetID) {
-                    goToDetail(result.data.AssetID);
-                } else {
-                    showSystemModal("ไม่พบข้อมูลครุภัณฑ์", "รหัสสแกน '" + decodedText + "' ไม่มีประวัติลงทะเบียนในสารสนเทศ IT UDON HOSP", "fa-solid fa-triangle-exclamation text-warning");
-                    resultCountLabel.innerText = "สแกนล้มเหลว";
-                }
-            } catch (err) {
-                showLoading(false);
-                console.error("Scanning API Error:", err);
-                showSystemModal("สแกนขัดข้อง", "ไม่สามารถติดต่อ API เพื่อค้นหาจากภาพสแกนได้ในขณะนี้", "fa-solid fa-circle-xmark text-danger");
-                resultCountLabel.innerText = "ระบบสแกนขัดข้อง";
+            // 1. นำค่าที่สแกนได้มาตัดคำ (จำลอง Logic จากหลังบ้าน)
+            let input = String(decodedText).trim();
+            if (input.includes("IcmAssetDetail/")) {
+                // แยกเอาเฉพาะรหัส AssetID ที่อยู่หลัง /IcmAssetDetail/ 
+                input = input.split("IcmAssetDetail/")[1].split("/")[0];
+            } else {
+                // ตัดตัวอักษรภาษาอังกฤษ ภาษาไทย และ http/https ออก (เหลือแค่ตัวเลขและเครื่องหมายขีด -)
+                input = input.replace(/[a-zA-Zก-ฮ:/]/g, '').trim();
             }
+
+            if (!input) {
+                showSystemModal("ข้อผิดพลาด", "ไม่พบรหัสที่ถูกต้องจากภาพที่สแกน โปรดลองใหม่อีกครั้ง", "fa-solid fa-triangle-exclamation text-warning");
+                return;
+            }
+
+            // 2. นำรหัสที่ตัดได้ไปใส่ในช่องค้นหา
+            searchInput.value = input;
+            clearBtn.style.display = 'block';
+
+            // 3. สั่งค้นหาฝั่ง Client ทันที
+            executeLocalSearch(input);
         }
 
         function onScanFailure(error) {
