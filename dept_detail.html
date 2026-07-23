@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <link rel="icon" type="image/png" href="logo2.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>บันทึกข้อมูลครุภัณฑ์คอมพิวเตอร์ - โรงพยาบาลอุดรธานี</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-pink: #f72f9d;
+            --gradient-header: linear-gradient(135deg, #fa0f88 0%, #f7a6cc 50%, #def5fa 85%);
+        }
+        body { font-family: 'Kanit', sans-serif; background-color: #fae8f0; }
+        .soft-card { background: white; border-radius: 24px; box-shadow: 0 4px 25px -5px rgba(0, 0, 0, 0.03); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .pink-header { background: var(--gradient-header); border-bottom-left-radius: 32px; border-bottom-right-radius: 32px; }
+        
+        @media (max-width: 768px) {
+            .asset-table thead { display: none; }
+            .asset-table tr { display: block; margin-bottom: 1rem; padding: 1.25rem; background: white; border-radius: 20px; border: 1px solid #f1f5f9; }
+            .asset-table td { display: flex; justify-content: space-between; padding: 0.5rem 0; border: none !important; text-align: right; }
+            .asset-table td::before { content: attr(data-label); font-weight: 600; color: #64748b; font-size: 0.75rem; text-align: left; margin-right: 1rem; }
+        }
+        .print-only { display: none; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+            th, td { border: 1px solid #cbd5e1; padding: 6px; }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="loaderModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-white/90 backdrop-blur-sm no-print">
+        <div class="text-center">
+            <div class="inline-block w-12 h-12 border-4 border-pink-100 border-t-pink-600 rounded-full animate-spin mb-3"></div>
+            <p class="text-pink-800 text-sm font-medium">กำลังดึงข้อมูลประวัติการตรวจสอบ...</p>
+        </div>
+    </div>
+
+    <header class="pink-header px-4 py-8 shadow-xl no-print">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+                <div class="bg-white p-2 rounded-2xl shadow-inner">
+                    <img src="https://img2.pic.in.th/-227e4f6f84f29f020.png" alt="Logo" class="h-12">
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-white tracking-tight">รายงานประวัติการตรวจสอบครุภัณฑ์ 2569</h1>
+                    <p class="text-white/80 text-sm font-light">ฝ่ายสารสนเทศทางการแพทย์ โรงพยาบาลอุดรธานี</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="window.location.href='dept_main_asset.html'" 
+                class="pink-gradient px-6 py-2.5 rounded-xl text-white font-bold shadow-lg shadow-pink-100 hover:scale-105 transition-all text-sm">
+                    🔙 กลับหน้าหลัก
+                </button>
+
+                <button onclick="exportToExcel()" class="bg-emerald-500 text-white px-5 py-2.5 rounded-2xl text-sm font-bold shadow-lg hover:bg-emerald-600 transition-all">
+                    <i class="fas fa-file-excel mr-2"></i>ส่งออก Excel
+                </button>
+                <button onclick="handlePrint()" class="bg-white text-pink-700 px-5 py-2.5 rounded-2xl text-sm font-bold shadow-lg hover:bg-pink-50 transition-all">
+                    <i class="fas fa-print mr-2"></i>พิมพ์รายงาน
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 -mt-6 pb-24">
+        <div id="deptInfo" class="soft-card p-6 md:p-8 mb-8 no-print">
+            <div class="flex flex-col md:flex-row gap-8 items-center">
+                <div class="w-32 h-32 rounded-3xl bg-slate-50 border border-slate-100 overflow-hidden shadow-sm flex-shrink-0">
+                    <img id="deptAvatar" src="" class="w-full h-full object-cover hidden">
+                    <div id="deptAvatarPlaceholder" class="w-full h-full flex items-center justify-center text-slate-300"><i class="fas fa-hospital text-5xl"></i></div>
+                </div>
+                <div class="text-center md:text-left flex-grow">
+                    <div class="flex items-center gap-2 mb-2 justify-center md:justify-start">
+                        <span class="bg-pink-100 text-pink-700 text-[10px] px-3 py-1 rounded-full font-bold uppercase">หน่วยงานผู้รับตรวจ</span>
+                        <span id="deptIdTag" class="text-xs font-mono text-slate-400"></span>
+                    </div>
+                    <h2 id="deptName" class="text-3xl font-extrabold text-slate-900 mb-4">กำลังโหลด...</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-600">
+                        <div id="locName" class="flex items-center justify-center md:justify-start gap-2"><i class="fas fa-map-marker-alt text-pink-500"></i> <span>-</span></div>
+                        <div id="locFloor" class="flex items-center justify-center md:justify-start gap-2"><i class="fas fa-layer-group text-pink-500"></i> <span>-</span></div>
+                        <div id="locPhone" class="flex items-center justify-center md:justify-start gap-2"><i class="fas fa-phone-alt text-pink-500"></i> <span>-</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="no-print mb-6">
+            <div class="relative max-w-2xl">
+                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="searchInput" onkeyup="filterLogs()" placeholder="ค้นหา รหัสครุภัณฑ์, ประเภท หรือสถานะ..." 
+                    class="w-full pl-14 pr-6 py-4 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 shadow-sm transition-all">
+            </div>
+        </div>
+
+        <div class="soft-card overflow-hidden no-print">
+            <div class="px-6 py-5 bg-slate-50/80 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                    <i class="fas fa-history text-pink-600"></i> รายการที่ตรวจสอบแล้ว
+                </h3>
+                <span id="recordCount" class="text-xs bg-pink-600 text-white px-3 py-1 rounded-lg font-bold shadow-sm">0 รายการ</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left asset-table">
+                    <thead>
+                        <thead>
+                        <tr class="text-[11px] bg-white text-slate-400 border-b uppercase tracking-widest font-semibold">
+                            <th class="px-6 py-4 text-center">ลำดับ</th>
+                            <th class="px-6 py-4 text-center">รูปภาพ</th> 
+                            <th class="px-6 py-4">รหัสครุภัณฑ์</th>
+                            <th class="px-6 py-4">กลุ่มผู้ใช้งาน</th>
+                            <th class="px-6 py-4">รายละเอียด</th>
+                            <th class="px-6 py-4 text-center">อายุ (ปี)</th>
+                            <th class="px-6 py-4 text-center">สถานะการใช้งาน</th>
+                            <th class="px-6 py-4">สถานะทะเบียน</th>
+                        </tr>
+
+                    </thead>
+                    <tbody id="logTbody" class="divide-y divide-slate-100 text-[13px]"></tbody>
+                </table>
+            </div>
+        </div>
+        <div id="detailModal" class="fixed inset-0 z-[110] hidden no-print">
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="closeModal()"></div>
+            
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] max-w-md">
+                <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/20 flex flex-col">
+                    
+                    <div class="relative w-full h-52 bg-slate-50 border-b border-slate-100 flex items-center justify-center overflow-hidden">
+                        <img id="modalAssetPhoto" src="" class="w-full h-full object-cover">
+                        <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 bg-black/20 backdrop-blur-md text-white rounded-full flex items-center justify-center hover:bg-black/40 transition-all">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-sm">
+                            <p id="modalAssetId" class="text-xl font-mono text-pink-600 font-bold uppercase tracking-tight"></p>
+                        </div>
+                    </div>
+        
+                    <div class="p-6 space-y-4 max-h-[55vh] overflow-y-auto text-sm">
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-0.5 uppercase font-bold tracking-wider">ประเภทครุภัณฑ์</label>
+                            <h3 id="modalType" class="text-xl font-black text-slate-800 leading-tight">-</h3>
+                        </div>
+        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                <label class="text-[10px] text-slate-400 block mb-1 uppercase font-bold">สถานะการตรวจ</label>
+                                <p id="modalStatus" class="font-bold text-slate-700">-</p>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                <label class="text-[10px] text-slate-400 block mb-1 uppercase font-bold">สถานะทะเบียน</label>
+                                <p id="modalRegStatus" class="font-bold text-slate-700">-</p>
+                            </div>
+                        </div>
+        
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                            <label class="text-[10px] text-slate-400 block mb-1 uppercase font-bold">รายละเอียดระบบ</label>
+                            <p id="modalDetail" class="text-slate-600 leading-relaxed text-xs">-</p>
+                        </div>
+        
+                        <div class="bg-pink-50 p-4 rounded-2xl border border-pink-100 flex justify-between items-center shadow-sm">
+                            <div>
+                                <label class="text-[10px] text-pink-400 block uppercase font-bold">อายุการใช้งาน</label>
+                                <p id="modalAge" class="font-black text-pink-700 text-lg">-- ปี</p>
+                            </div>
+                            <div class="text-center">
+                                <label class="text-[10px] text-pink-400 block uppercase font-bold">ช่วงเวลาใช้งาน</label>
+                                <p id="modalShift_Work" class="font-black text-pink-700 text-xs">-</p>
+                            </div>
+                            <div class="text-right">
+                                <label class="text-[10px] text-pink-400 block uppercase font-bold">กลุ่มผู้ใช้งาน</label>
+                                <p id="modalPriority" class="font-black text-pink-700 text-xs">-</p>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="p-4 bg-slate-50 border-t border-slate-100">
+                        <button onclick="closeModal()" class="w-full py-4 bg-white border-2 border-slate-200 text-slate-600 rounded-2xl font-bold hover:bg-slate-100 transition-all shadow-sm active:scale-95">
+                            <i class="fas fa-chevron-left mr-2"></i> กลับสู่รายการ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="printArea" class="print-only">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold">ใบสรุปผลการตรวจสอบครุภัณฑ์คอมพิวเตอร์ ประจำปี 2569</h2>
+                <p class="text-lg">หน่วยงาน: <span id="printDeptName" class="font-bold border-b border-black"></span></p>
+                <p class="text-sm text-slate-500 mt-1">วันที่พิมพ์: <span id="printDate"></span></p>
+            </div>
+            <div id="printTableContainer"></div>
+            <div class="mt-20 grid grid-cols-2 gap-10 text-center">
+                <div>
+                    <p class="mb-10">ลงชื่อ......................................................</p>
+                    <p>(......................................................)</p>
+                    <p>หัวหน้าหน่วยงาน/ผู้รับตรวจ</p>
+                </div>
+                <div>
+                    <p class="mb-10">ลงชื่อ......................................................</p>
+                    <p>(......................................................)</p>
+                    <p>เจ้าหน้าที่ผู้ตรวจสอบ</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzwrBGrPJlrjybVaSifTkLvIT4HurtVZZSbZTo3OrUyaEwXOgfDId1TmuMyg5-yX_DbBQ/exec';
+        let allLogs = [];
+        const params = new URLSearchParams(window.location.search);
+        const depId = params.get('DEP_ID');
+
+        window.onload = () => { if(depId) fetchAllData(); };
+
+        async function fetchAllData() {
+            try {
+                const res = await fetch(`${API_URL}?action=getFullData&DEP_ID=${depId}`);
+                const data = await res.json();
+                if(data.error) throw new Error(data.error);
+
+                const d = data.department;
+                document.getElementById('deptName').innerText = d.DEPNAME || 'ไม่พบชื่อหน่วยงาน';
+                document.getElementById('deptIdTag').innerText = `ID: ${d.DEP_ID}`;
+                document.getElementById('locName').querySelector('span').innerText = d.LOCATION_NAME || '-';
+                document.getElementById('locFloor').querySelector('span').innerText = `ชั้น ${d.FL || '-'}`;
+                document.getElementById('locPhone').querySelector('span').innerText = d.Tell || '-';
+                
+                
+                if(d.photoUrl) {
+                    const img = document.getElementById('deptAvatar');
+                    img.src = d.photoUrl;
+                    img.classList.remove('hidden');
+                    document.getElementById('deptAvatarPlaceholder').classList.add('hidden');
+                }
+
+                allLogs = data.auditLogs || [];
+                renderLogTable(allLogs);
+            } catch (err) {
+                console.error(err);
+                alert("เกิดข้อผิดพลาดในการโหลดข้อมูล");
+            } finally {
+                document.getElementById('loaderModal').classList.add('hidden');
+            }
+        }
+
+        // แก้ไข renderLogTable เพื่อให้คลิกแถวได้
+    function renderLogTable(data) {
+        const tbody = document.getElementById('logTbody');
+        document.getElementById('recordCount').innerText = `${data.length} รายการ`;
+        tbody.innerHTML = '';
+        
+        if(data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="py-20 text-center text-slate-400">ไม่พบประวัติการตรวจสอบ</td></tr>`;
+            return;
+        }
+    
+        const groupedData = data.reduce((acc, item) => {
+            const type = item.Asset_Type || 'ไม่ระบุประเภท';
+            if (!acc[type]) acc[type] = [];
+            acc[type].push(item);
+            return acc;
+        }, {});
+    
+        Object.keys(groupedData).forEach((type) => {
+            const items = groupedData[type];
+            
+            // Header กลุ่มประเภท
+            // โค้ดเดิมของคุณที่เป็นสาเหตุ
+           const headerRow = `
+        <tr class="bg-slate-50 border-y border-slate-200/60">
+            <td colspan="8" class="px-6 py-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-6 bg-pink-500 rounded-full"></div>
+                        <span class="font-black text-slate-700 uppercase tracking-wide text-sm">${type}</span>
+                    </div>
+                    <span class="text-[10px] font-bold bg-white px-3 py-1 rounded-full border border-slate-200 text-slate-400">
+                        ${items.length} รายการ
+                    </span>
+                </div>
+            </td>
+        </tr>`;
+    
+    tbody.insertAdjacentHTML('beforeend', headerRow);
+
+    items.forEach((item, idx) => {
+                // ✅ กำหนด URL รูปภาพ (ใช้รูปตรวจจริงก่อน ถ้าไม่มีใช้ Placeholder)
+                const photoUrl = item.Asset_Photo || 'https://placehold.co/100?text=No+Photo';
+                
+                const row = `
+                    <tr onclick="openDetailFromGroup('${item.Asset_ID || item.NOID}')" class="hover:bg-pink-50/50 cursor-pointer transition-colors group border-b border-slate-50">
+                        <td class="px-6 py-4 text-center text-slate-400 font-mono text-[11px]">${idx + 1}</td>
+                        
+                        <td class="px-4 py-2 text-center">
+                            <div class="w-12 h-12 mx-auto rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm">
+                                <img src="${photoUrl}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100?text=Error'">
+                            </div>
+                        </td>
+    
+                        <td class="px-6 py-4 font-bold text-pink-700 group-hover:text-pink-600">${item.Asset_ID || item.NOID}</td>
+                        <td class="px-6 py-4 text-xs text-slate-600">${item.Priority || '-'}</td>
+                        <td class="px-6 py-4 text-slate-500 truncate max-w-[200px] text-xs">${item.DB_Detail || '-'}</td>
+                        <td class="px-6 py-4 text-center font-bold text-pink-600">${item.DB_Age || '0'} ปี</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="px-2 py-1 rounded-md text-[10px] font-bold ${item.CoStatus === '✅ใช้งานอยู่' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">
+                                ${item.CoStatus || 'ไม่มีการบันทึก'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-[10px] text-slate-400">${item.RegStatus ||item.Note2 ||'-'}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        });
+    }
+
+    function openDetail(index) {
+        const item = allLogs[index];
+        if (!item) return;
+    
+        const modalImg = document.getElementById('modalAssetPhoto');
+        modalImg.src = (item.Asset_Photo && item.Asset_Photo.includes('http')) 
+                       ? item.Asset_Photo 
+                       : 'https://placehold.co/400x300?text=No+Photo';
+    
+        modalImg.onerror = function() { this.src = 'https://placehold.co/400x300?text=Image+Access+Denied'; };
+    
+        // ใช้ฟังก์ชันช่วยดัก Error
+        const setSafeText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = value || '-';
+        };
+    
+        setSafeText('modalAssetId', item.Asset_ID || item.NOID);
+        setSafeText('modalType', item.Asset_Type);
+        setSafeText('modalDetail', item.DB_Detail || 'ไม่มีรายละเอียด');
+        setSafeText('modalAge', `${item.DB_Age || '0'} ปี`);
+        setSafeText('modalPriority', item.Priority);
+        setSafeText('modalShift_Work', item.Shift_Work); // ตอนนี้จะใช้งานได้แล้ว
+        setSafeText('modalRegStatus', item.RegStatus);
+        setSafeText('modalStatus', item.CoStatus);
+    
+        // 4. เปิด Modal - แนะนำให้ใช้ flex แทนการเอาแค่ hidden ออกเพื่อให้กึ่งกลาง
+        const modal = document.getElementById('detailModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex'); // เพื่อให้ class items-center justify-center ทำงาน
+        document.body.style.overflow = 'hidden';
+    }
+    function openDetailFromGroup(assetId) {
+        const index = allLogs.findIndex(i => (i.Asset_ID || i.NOID) === assetId);
+        if(index !== -1) openDetail(index);
+    }
+        // ฟังก์ชันเปิด Modal พร้อมใส่ข้อมูล
+      
+        
+        function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+        function handlePrint() {
+            document.getElementById('printDeptName').innerText = document.getElementById('deptName').innerText;
+            document.getElementById('printDate').innerText = new Date().toLocaleString('th-TH');
+            
+            let tableHtml = `<table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f1f5f9;">
+                        <th style="border:1px solid #cbd5e1; padding:8px;">#</th>
+                        <th style="border:1px solid #cbd5e1; padding:8px;">รหัส</th>
+                        <th style="border:1px solid #cbd5e1; padding:8px;">ประเภท</th>
+                        <th style="border:1px solid #cbd5e1; padding:8px;">รายละเอียด</th>
+                        <th style="border:1px solid #cbd5e1; padding:8px;">อายุ</th>
+                        <th style="border:1px solid #cbd5e1; padding:8px;">สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            allLogs.forEach((item, idx) => {
+                tableHtml += `<tr>
+                    <td style="border:1px solid #cbd5e1; padding:8px; text-align:center;">${idx+1}</td>
+                    <td style="border:1px solid #cbd5e1; padding:8px;">${item.Asset_ID || item.NOID}</td>
+                    <td style="border:1px solid #cbd5e1; padding:8px;">${item.Asset_Type || '-'}</td>
+                    <td style="border:1px solid #cbd5e1; padding:8px;">${item.DB_Detail || '-'}</td>
+                    <td style="border:1px solid #cbd5e1; padding:8px; text-align:center;">${item.DB_Age || '0'}</td>
+                    <td style="border:1px solid #cbd5e1; padding:8px; text-align:center;">${item.CoStatus || '-'}</td>
+                    <td style="border:1px solid #cbd5e1; padding:8px;">${item.Priority || '-'}</td>
+                </tr>`;
+            });
+            
+            tableHtml += `</tbody></table>`;
+            document.getElementById('printTableContainer').innerHTML = tableHtml;
+            window.print();
+        }
+
+        function exportToExcel() {
+            if (allLogs.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก");
+            
+            const deptName = document.getElementById('deptName').innerText;
+            const excelData = allLogs.map((item, idx) => ({
+                "ลำดับ": idx + 1,
+                "รหัสครุภัณฑ์": item.Asset_ID || item.NOID,
+                "ประเภท": item.Asset_Type,
+                "รายละเอียด": item.DB_Detail,
+                "อายุ (ปี)": item.DB_Age,
+                "สถานะ": item.CoStatus,
+                "การใช้งาน":item.Priority ,
+                "วันที่ตรวจ": item.Timestamp ? new Date(item.Timestamp).toLocaleDateString('th-TH') : '-'
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "AuditLogs");
+            XLSX.writeFile(wb, `รายงาน_${deptName}.xlsx`);
+        }
+
+        function filterLogs() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allLogs.filter(i => 
+                String(i.Asset_ID).toLowerCase().includes(q) || 
+                String(i.Asset_Type).toLowerCase().includes(q) ||
+                String(i.DB_Detail).toLowerCase().includes(q)
+            );
+            renderLogTable(filtered);
+        }
+
+        function goHome() { window.history.back(); }
+    </script>
+</body>
+</html>
